@@ -23,9 +23,17 @@ impl Validator {
             }
         };
 
-        Ok(Validator {
-            schema: JSONSchema::options().compile(&value).unwrap(),
-        })
+        let schema = match JSONSchema::options().compile(&value) {
+            Ok(schema) => schema,
+            Err(error) => {
+                return Err(magnus::Error::new(
+                    ruby.get_inner(&SCHEMA_PARSE_ERROR),
+                    error.to_string(),
+                ))
+            }
+        };
+
+        Ok(Validator { schema })
     }
 
     fn is_valid(&self, json: String) -> bool {
@@ -59,6 +67,19 @@ static JSON_PARSE_ERROR: Lazy<ExceptionClass> = Lazy::new(|ruby| {
         .const_get::<_, RModule>("RustJSONSchema")
         .unwrap()
         .const_get("JSONParseError")
+        .unwrap();
+    // ensure `ex` is never garbage collected (e.g. if constant is
+    // redefined) and also not moved under compacting GC.
+    register_mark_object(ex);
+    ex
+});
+
+static SCHEMA_PARSE_ERROR: Lazy<ExceptionClass> = Lazy::new(|ruby| {
+    let ex = ruby
+        .class_object()
+        .const_get::<_, RModule>("RustJSONSchema")
+        .unwrap()
+        .const_get("SchemaParseError")
         .unwrap();
     // ensure `ex` is never garbage collected (e.g. if constant is
     // redefined) and also not moved under compacting GC.
