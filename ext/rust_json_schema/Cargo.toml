@@ -1,0 +1,15 @@
+[package]
+name = "rust_json_schema"
+version = "0.1.0"
+edition = "2021"
+authors = ["Taylor Thurlow <thurlow@hey.com>"]
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+jsonschema = "0.17.1"
+magnus = "0.6"
+serde_json = "1.0"
