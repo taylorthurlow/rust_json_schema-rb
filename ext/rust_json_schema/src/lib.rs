@@ -94,7 +94,7 @@ fn init(ruby: &Ruby) -> Result<(), magnus::Error> {
 
     class.define_singleton_method("new", function!(Validator::new, 1))?;
 
-    class.define_method("is_valid", method!(Validator::is_valid, 1))?;
+    class.define_method("valid?", method!(Validator::is_valid, 1))?;
     class.define_method("validate", method!(Validator::validate, 1))?;
 
     Ok(())
