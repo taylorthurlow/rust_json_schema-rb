@@ -1,7 +1,10 @@
-use magnus::{function, method, prelude::*, wrap, Error, Ruby};
+use magnus::{
+    exception::ExceptionClass, function, gc::register_mark_object, method, prelude::*, value::Lazy,
+    wrap, RModule, Ruby,
+};
 
+extern crate serde_json;
 use jsonschema::JSONSchema;
-use serde_json::Value;
 
 #[wrap(class = "RustJSONSchema::Validator")]
 struct Validator {
@@ -9,27 +12,30 @@ struct Validator {
 }
 
 impl Validator {
-    fn new(json: String) -> Validator {
-        let value: Value = match serde_json::from_str(&json) {
+    fn new(ruby: &Ruby, json: String) -> Result<Validator, magnus::Error> {
+        let value: serde_json::Value = match serde_json::from_str(&json) {
             Ok(value) => value,
             Err(error) => {
-                panic!("Could not parse JSON: {}", error);
+                return Err(magnus::Error::new(
+                    ruby.get_inner(&JSON_PARSE_ERROR),
+                    error.to_string(),
+                ))
             }
         };
 
-        Validator {
+        Ok(Validator {
             schema: JSONSchema::options().compile(&value).unwrap(),
-        }
+        })
     }
 
     fn is_valid(&self, json: String) -> bool {
-        let value: Value = serde_json::from_str(&json).unwrap();
+        let value: serde_json::Value = serde_json::from_str(&json).unwrap();
 
         self.schema.is_valid(&value)
     }
 
     fn validate(&self, json: String) -> Vec<String> {
-        let value: Value = serde_json::from_str(&json).unwrap();
+        let value: serde_json::Value = serde_json::from_str(&json).unwrap();
         let mut errors: Vec<String> = vec![];
 
         if let Err(validation_errors) = self.schema.validate(&value) {
@@ -47,8 +53,21 @@ impl Validator {
     }
 }
 
+static JSON_PARSE_ERROR: Lazy<ExceptionClass> = Lazy::new(|ruby| {
+    let ex = ruby
+        .class_object()
+        .const_get::<_, RModule>("RustJSONSchema")
+        .unwrap()
+        .const_get("JSONParseError")
+        .unwrap();
+    // ensure `ex` is never garbage collected (e.g. if constant is
+    // redefined) and also not moved under compacting GC.
+    register_mark_object(ex);
+    ex
+});
+
 #[magnus::init]
-fn init(ruby: &Ruby) -> Result<(), Error> {
+fn init(ruby: &Ruby) -> Result<(), magnus::Error> {
     let module = ruby.define_module("RustJSONSchema")?;
     let class = module.define_class("Validator", ruby.class_object())?;
 
