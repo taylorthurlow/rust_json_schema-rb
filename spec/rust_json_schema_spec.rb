@@ -51,7 +51,10 @@ RSpec.describe RustJSONSchema do
 
         it "returns an empty array" do
           validator = RustJSONSchema::Validator.new(schema)
-          expect(validator.validate(input)).to eq([])
+
+          errors = validator.validate(input)
+
+          expect(errors).to eq([])
         end
       end
 
@@ -73,6 +76,58 @@ RSpec.describe RustJSONSchema do
             'path "/foo": 1 is not of type "string"',
             'path "/": "baz" is a required property'
           )
+        end
+      end
+    end
+
+    describe "#valid?" do
+      let(:schema) do
+        JSON.generate(
+          properties: {
+            foo: {
+              type: "string"
+            },
+            bar: {
+              type: "number"
+            },
+            baz: {}
+          },
+          required: ["baz"]
+        )
+      end
+
+      context "when the input is valid" do
+        let(:input) do
+          JSON.generate(
+            foo: "foo",
+            bar: 1,
+            baz: "wadus"
+          )
+        end
+
+        it "returns true" do
+          validator = RustJSONSchema::Validator.new(schema)
+
+          result = validator.valid?(input)
+
+          expect(result).to be true
+        end
+      end
+
+      context "when the input is invalid" do
+        let(:input) do
+          JSON.generate(
+            foo: 1,
+            bar: "wadus"
+          )
+        end
+
+        it "returns false" do
+          validator = RustJSONSchema::Validator.new(schema)
+
+          result = validator.valid?(input)
+
+          expect(result).to be false
         end
       end
     end
