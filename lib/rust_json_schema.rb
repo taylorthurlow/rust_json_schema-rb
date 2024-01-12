@@ -7,5 +7,6 @@ module RustJSONSchema
   class Error < StandardError; end
 
   class JSONParseError < Error; end
+
   class SchemaParseError < Error; end
 end
