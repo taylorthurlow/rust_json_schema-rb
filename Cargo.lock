@@ -992,6 +992,7 @@ version = "0.1.0"
 dependencies = [
  "jsonschema",
  "magnus",
+ "rb-sys",
  "serde_json",
 ]
 
