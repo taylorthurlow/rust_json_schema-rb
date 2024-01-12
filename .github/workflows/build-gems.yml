@@ -1,0 +1,88 @@
+---
+# 👋 Look here for another good example: https://github.com/bytecodealliance/wasmtime-rb/tree/main/.github/workflows
+name: Build gems
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main", "cross-gem/*"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci-data:
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.fetch.outputs.result }}
+    steps:
+      # This compiles for all supported Ruby cross-compilation platforms.
+      - id: fetch
+        uses: oxidize-rb/actions/fetch-ci-data@v1
+        with:
+          supported-ruby-platforms: |
+            exclude: []
+          stable-ruby-versions: |
+            exclude: [head]
+
+  cross_gems:
+    name: Cross compile gems
+    needs: ci-data
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-platform: ${{ fromJSON(needs.ci-data.outputs.result).supported-ruby-platforms }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set variables
+        id: vars
+        run: |
+          if [[ "${{ inputs.rb-sys-branch }}" == "" ]]; then
+            echo "rb_sys_branch=main" >> $GITHUB_OUTPUT
+          else
+            echo "rb_sys_branch=${{ inputs.rb-sys-branch }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Patch rb-sys version
+        id: patch
+        if: ${{ inputs.rb-sys-branch }}
+        run: |
+          mkdir -p .cargo
+          echo "[patch.crates-io]" >> .cargo/config.toml
+          echo "rb-sys = { git = \"https://github.com/oxidize-rb/rb-sys\", branch = \"${{ inputs.rb-sys-branch }}\" }" >> .cargo/config.toml
+          echo "rb-sys-env = { git = \"https://github.com/oxidize-rb/rb-sys\", branch = \"${{ inputs.rb-sys-branch }}\" }" >> .cargo/config.toml
+          sed -i "s|gem 'rb_sys', '.*'|gem 'rb_sys', github: 'oxidize-rb/rb-sys', branch: '${{ inputs.rb-sys-branch }}'|g" Gemfile
+          cargo update -p rb-sys
+
+      - uses: "ruby/setup-ruby@v1"
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      - uses: oxidize-rb/actions/cross-gem@v1
+        with:
+          platform: ${{ matrix.ruby-platform }}
+          tag: ${{ steps.vars.outputs.rb_sys_branch }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: cross-gem-${{ matrix.ruby-platform }}
+          path: pkg/*-${{ matrix.ruby-platform }}.gem
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: "Set rb-sys version"
+        id: capture
+        run: |
+          echo "rb-sys-version=$(bundle exec rb-sys-dock --version)" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: rb-sys-bindings-${{ steps.capture.outputs.rb-sys-version }}
+          path: |
+            tmp/rb-sys-dock/${{ matrix.ruby-platform }}/**/cfg-capture*
+            tmp/rb-sys-dock/${{ matrix.ruby-platform }}/**/bindings*
+            tmp/${{ matrix.ruby-platform }}/
+          if-no-files-found: error
