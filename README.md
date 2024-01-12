@@ -30,7 +30,7 @@ validator = RustJSONSchema::Validator.new(<<~JSON)
       "bar": { "type": "integer" },
       "baz": {},
     },
-    "required": ["foo", "bar"],
+    "required": ["foo", "baz"],
   }
 JSON
 
