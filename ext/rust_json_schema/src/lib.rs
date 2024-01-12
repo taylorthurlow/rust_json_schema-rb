@@ -97,5 +97,9 @@ fn init(ruby: &Ruby) -> Result<(), magnus::Error> {
     class.define_method("valid?", method!(Validator::is_valid, 1))?;
     class.define_method("validate", method!(Validator::validate, 1))?;
 
+    // Ensure defined at load time
+    Lazy::force(&JSON_PARSE_ERROR, ruby);
+    Lazy::force(&SCHEMA_PARSE_ERROR, ruby);
+
     Ok(())
 }
