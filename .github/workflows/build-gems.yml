@@ -1,10 +1,11 @@
 ---
 # 👋 Look here for another good example: https://github.com/bytecodealliance/wasmtime-rb/tree/main/.github/workflows
-name: Build gems
+name: Build, compile, and publish
 on:
   workflow_dispatch:
   push:
-    branches: ["main", "cross-gem/*"]
+    tags:
+      - v*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -88,7 +89,7 @@ jobs:
             tmp/${{ matrix.ruby-platform }}/
           if-no-files-found: error
 
-      - name: "NOOP: Publish to RubyGems"
+      - name: "Publish to RubyGems"
         id: publish
         env:
           GEM_HOST_API_KEY: "${{secrets.RUBYGEMS_AUTH_TOKEN}}"
@@ -97,4 +98,4 @@ jobs:
           touch $HOME/.gem/credentials
           chmod 0600 $HOME/.gem/credentials
           printf -- "---\n:rubygems_api_key: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
-          echo pkg/*-${{ matrix.ruby-platform }}.gem
+          gem push pkg/*-${{ matrix.ruby-platform }}.gem
