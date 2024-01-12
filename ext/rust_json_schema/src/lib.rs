@@ -12,12 +12,12 @@ struct Validator {
 }
 
 impl Validator {
-    fn new(ruby: &Ruby, json: String) -> Result<Validator, magnus::Error> {
+    fn new(json: String) -> Result<Validator, magnus::Error> {
         let value: serde_json::Value = match serde_json::from_str(&json) {
             Ok(value) => value,
             Err(error) => {
                 return Err(magnus::Error::new(
-                    ruby.get_inner(&JSON_PARSE_ERROR),
+                    Self::ruby().get_inner(&JSON_PARSE_ERROR),
                     error.to_string(),
                 ))
             }
@@ -27,7 +27,7 @@ impl Validator {
             Ok(schema) => schema,
             Err(error) => {
                 return Err(magnus::Error::new(
-                    ruby.get_inner(&SCHEMA_PARSE_ERROR),
+                    Self::ruby().get_inner(&SCHEMA_PARSE_ERROR),
                     error.to_string(),
                 ))
             }
@@ -36,14 +36,31 @@ impl Validator {
         Ok(Validator { schema })
     }
 
-    fn is_valid(&self, json: String) -> bool {
-        let value: serde_json::Value = serde_json::from_str(&json).unwrap();
+    fn is_valid(&self, json: String) -> Result<bool, magnus::Error> {
+        let value: serde_json::Value = match serde_json::from_str(&json) {
+            Ok(value) => value,
+            Err(error) => {
+                return Err(magnus::Error::new(
+                    Self::ruby().get_inner(&JSON_PARSE_ERROR),
+                    error.to_string(),
+                ));
+            }
+        };
 
-        self.schema.is_valid(&value)
+        Ok(self.schema.is_valid(&value))
     }
 
-    fn validate(&self, json: String) -> Vec<String> {
-        let value: serde_json::Value = serde_json::from_str(&json).unwrap();
+    fn validate(&self, json: String) -> Result<Vec<String>, magnus::Error> {
+        let value: serde_json::Value = match serde_json::from_str(&json) {
+            Ok(value) => value,
+            Err(error) => {
+                return Err(magnus::Error::new(
+                    Self::ruby().get_inner(&JSON_PARSE_ERROR),
+                    error.to_string(),
+                ))
+            }
+        };
+
         let mut errors: Vec<String> = vec![];
 
         if let Err(validation_errors) = self.schema.validate(&value) {
@@ -57,7 +74,11 @@ impl Validator {
             }
         }
 
-        errors
+        Ok(errors)
+    }
+
+    fn ruby() -> Ruby {
+        Ruby::get().unwrap()
     }
 }
 

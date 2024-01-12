@@ -78,6 +78,16 @@ RSpec.describe RustJSONSchema do
           )
         end
       end
+
+      context "when the input is invalid JSON" do
+        it "raises RustJSONSchema::JSONParseError" do
+          validator = RustJSONSchema::Validator.new(schema)
+
+          expect {
+            validator.validate("not valid json")
+          }.to raise_exception(RustJSONSchema::JSONParseError)
+        end
+      end
     end
 
     describe "#valid?" do
@@ -128,6 +138,16 @@ RSpec.describe RustJSONSchema do
           result = validator.valid?(input)
 
           expect(result).to be false
+        end
+      end
+
+      context "when the input is invalid JSON" do
+        it "raises RustJSONSchema::JSONParseError" do
+          validator = RustJSONSchema::Validator.new(schema)
+
+          expect {
+            validator.valid?("not valid json")
+          }.to raise_exception(RustJSONSchema::JSONParseError)
         end
       end
     end
