@@ -1,34 +1,64 @@
-# RustJSONSchema
+# `rust_json_schema`
 
-TODO: Delete this and the text below, and describe your gem
+`rust_json_schema` is a Ruby wrapper gem for Rust's [jsonschema-rs crate](https://github.com/Stranger6667/jsonschema-rs).
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rust_json_schema`. To experiment with that code, run `bin/console` for an interactive prompt.
+## Warning
+
+I do not have any significant Rust programming experience, but this gem satisifies a need for a performant JSON Schema validation tool in Ruby land. While I intend to use this gem in a production environment, consider this code and library entirely experimental, at least until a 1.0 release, if it ever comes to that.
+
+[rusty_json_schema](https://github.com/driv3r/rusty_json_schema) is a direct source of inspiration (and in some cases, literal copy and paste, like some fixtures/specs). Now that [bundler has explicit support for rust-backed Ruby gems](https://bundler.io/blog/2023/01/31/rust-gem-skeleton.html) as of early 2023, the Rust library code is a lot simpler that it previously needed to be, largely thanks to [magnus crate](https://github.com/matsadler/magnus) and the [rb-sys gem](https://github.com/oxidize-rb/rb-sys/tree/main/gem).
+
+Eventually I intend to ship common platform binaries as part of this gem, eliminating the need for a Rust toolchain on client machines, but that is not yet the case.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
-
 Install the gem and add to the application's Gemfile by executing:
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+    $ bundle add rust_json_schema
 
 If bundler is not being used to manage dependencies, install the gem by executing:
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+    $ gem install rust_json_schema
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+validator = RustJSONSchema::Validator.new(<<~JSON)
+  {
+    "properties": {
+      "foo": { "type": "string" },
+      "bar": { "type": "integer" },
+      "baz": {},
+    },
+    "required": ["foo", "bar"],
+  }
+JSON
+
+errors = validator.validate('{ "foo": 1, "bar": "wadus" }')
+# => [
+#   'path "/bar": "wadus" is not of type "number"',
+#   'path "/foo": 1 is not of type "string"',
+#   'path "/": "baz" is a required property'
+# ]
+```
+
+### Errors
+
+- All errors are subclasses of `RustJSONSchema::Error`.
+- Calling `RustJSONSchema::Validator#new`, `#validate` or `#valid?` with a string which is not valid JSON will raise `RustJSONSchema::JSONParseError`.
+- Calling `RustJSONSchema::Validator#new` with an invalid schema will raise `RustJSONSchema::SchemaParseError`.
+
+## TODO
+
+- Support passing options as `jsonschema-rs` does
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+TODO
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/rust_json_schema.
+Bug reports and pull requests are welcome.
 
 ## License
 
