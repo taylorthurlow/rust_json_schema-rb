@@ -15,3 +15,5 @@ target/
 
 # rspec failure tracking
 .rspec_status
+
+Gemfile.lock
