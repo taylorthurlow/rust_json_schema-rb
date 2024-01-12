@@ -28,9 +28,9 @@ validator = RustJSONSchema::Validator.new(<<~JSON)
     "properties": {
       "foo": { "type": "string" },
       "bar": { "type": "integer" },
-      "baz": {},
+      "baz": {}
     },
-    "required": ["foo", "baz"],
+    "required": ["foo", "baz"]
   }
 JSON
 
