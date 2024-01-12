@@ -14,8 +14,7 @@ task build: :compile
 rubies = ["3.3.0", "3.2.0", "3.1.0", "3.0.0"]
 ENV["RUBY_CC_VERSION"] = rubies.join(":")
 
-spec = Gem::Specification.load("rust_json_schema.gemspec")
-
+spec = Bundler::GemHelper.gemspec
 RbSys::ExtensionTask.new("rust_json_schema", spec) do |ext|
   ext.lib_dir = "lib/rust_json_schema"
 
