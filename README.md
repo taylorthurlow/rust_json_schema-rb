@@ -4,6 +4,8 @@
 
 `rust_json_schema` is a Ruby wrapper gem for Rust's [jsonschema-rs crate](https://github.com/Stranger6667/jsonschema-rs).
 
+The minimum Ruby version required by this gem is 3.0, due to the runtime Rust libraries that make the extensions possible (and easy).
+
 This gem ships with precompiled binaries for Linux and macOS. Check the available gems on [Rubygems](https://rubygems.org/gems/rust_json_schema). Precompiled binaries do not exist for non-standard rubies like JRuby or TruffleRuby, nor do they exist for Windows. I will review and accept PRs if you would like to work on adding these build targets.
 
 [rusty_json_schema](https://github.com/driv3r/rusty_json_schema) is a direct source of inspiration. Now that [bundler has explicit support for rust-backed Ruby gems](https://bundler.io/blog/2023/01/31/rust-gem-skeleton.html) as of early 2023, the Rust library code is a lot simpler that it previously needed to be, largely thanks to [magnus crate](https://github.com/matsadler/magnus) and the [rb-sys gem](https://github.com/oxidize-rb/rb-sys/tree/main/gem), and by extension, the [oxidize-rb team](https://github.com/oxidize-rb).
