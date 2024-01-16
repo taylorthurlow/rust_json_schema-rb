@@ -35,6 +35,10 @@ jobs:
       matrix:
         ruby-platform: ${{ fromJSON(needs.ci-data.outputs.result).supported-ruby-platforms }}
     steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libssl-dev
+        shell: bash
       - uses: actions/checkout@v4
 
       - name: Set variables
