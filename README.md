@@ -6,11 +6,11 @@
 
 This gem ships with precompiled binaries for Linux and macOS. Check the available gems on [Rubygems](https://rubygems.org/gems/rust_json_schema). Precompiled binaries do not exist for non-standard rubies like JRuby or TruffleRuby, nor do they exist for Windows. I will review and accept PRs if you would like to work on adding these build targets.
 
+[rusty_json_schema](https://github.com/driv3r/rusty_json_schema) is a direct source of inspiration. Now that [bundler has explicit support for rust-backed Ruby gems](https://bundler.io/blog/2023/01/31/rust-gem-skeleton.html) as of early 2023, the Rust library code is a lot simpler that it previously needed to be, largely thanks to [magnus crate](https://github.com/matsadler/magnus) and the [rb-sys gem](https://github.com/oxidize-rb/rb-sys/tree/main/gem), and by extension, the [oxidize-rb team](https://github.com/oxidize-rb).
+
 ## Warning
 
-I do not have any significant Rust programming experience, but this gem satisifies a need for a performant JSON Schema validation tool in Ruby land. While I intend to use this gem in a production environment, consider this code and library entirely experimental, at least until a 1.0 release, if it ever comes to that.
-
-[rusty_json_schema](https://github.com/driv3r/rusty_json_schema) is a direct source of inspiration (and in some cases, literal copy and paste, like some fixtures/specs). Now that [bundler has explicit support for rust-backed Ruby gems](https://bundler.io/blog/2023/01/31/rust-gem-skeleton.html) as of early 2023, the Rust library code is a lot simpler that it previously needed to be, largely thanks to [magnus crate](https://github.com/matsadler/magnus) and the [rb-sys gem](https://github.com/oxidize-rb/rb-sys/tree/main/gem), and by extension, the [oxidize-rb team](https://github.com/oxidize-rb).
+My experience with Rust is limited, but this gem does have tests, and it is deployed in production. Please confirm that the gem is working as expected before using it in any production-critical situation. If you are using this gem in a production environment, and have any comments or feedback, I would love to hear about it.
 
 ## Installation
 
