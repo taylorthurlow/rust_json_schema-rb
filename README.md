@@ -4,7 +4,7 @@
 
 `rust_json_schema` is a Ruby wrapper gem for Rust's [jsonschema-rs crate](https://github.com/Stranger6667/jsonschema-rs).
 
-This gem ships with precompiled binaries for Linux and macOS. Check the available gems on [Rubygems](https://rubygems.org/gems/rust_json_schema).
+This gem ships with precompiled binaries for Linux and macOS. Check the available gems on [Rubygems](https://rubygems.org/gems/rust_json_schema). Precompiled binaries do not exist for non-standard rubies like JRuby or TruffleRuby, nor do they exist for Windows. I will review and accept PRs if you would like to work on adding these build targets.
 
 ## Warning
 
