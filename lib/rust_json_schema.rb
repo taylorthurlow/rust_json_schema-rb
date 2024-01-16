@@ -8,6 +8,8 @@ module RustJSONSchema
   class JSONParseError < Error; end
 
   class SchemaParseError < Error; end
+
+  class InvalidOptionsError < Error; end
 end
 
 # Tries to require the extension for the given Ruby version first

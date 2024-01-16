@@ -25,7 +25,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
 ## Usage
 
 ```ruby
-validator = RustJSONSchema::Validator.new(<<~JSON)
+schema = <<~JSON
   {
     "properties": {
       "foo": { "type": "string" },
@@ -36,6 +36,12 @@ validator = RustJSONSchema::Validator.new(<<~JSON)
   }
 JSON
 
+validator = RustJSONSchema::Validator.new(
+  schema,
+  draft: :draft7,
+  with_meta_schemas: false
+)
+
 errors = validator.validate('{ "foo": 1, "bar": "wadus" }')
 # => [
 #   'path "/bar": "wadus" is not of type "number"',
@@ -44,15 +50,19 @@ errors = validator.validate('{ "foo": 1, "bar": "wadus" }')
 # ]
 ```
 
+### Options
+
+- `:draft` - Select the JSON schema draft number to use. Valid options are `draft4`, `draft6`, `draft7`, `draft201909`, and `draft202012`. Supported drafts are entirely determined by the `jsonschema` crate. The default draft is also determined by the crate. If new versions of the crate support additional draft versions, a code change in this gem will be required. I'm open to PRs to solve this problem - I don't know enough Rust to tell if it's easily done. *Both `draft201909` and `draft202012` are reported to have "some keywords not implemented", so use them at your own risk.*
+- `:with_meta_schemas` - See [docs.rs/jsonschema CompilationOptions with_meta_schemas](https://docs.rs/jsonschema/0.17.1/jsonschema/struct.CompilationOptions.html#method.with_meta_schemas). `false` by default.
+
+Any additional options provided by the `jsonschema` crate are options I do not understand or may not make sense to implement in a wrapper library such as this.
+
 ### Errors
 
 - All errors are subclasses of `RustJSONSchema::Error`.
 - Calling `RustJSONSchema::Validator#new`, `#validate` or `#valid?` with a string which is not valid JSON will raise `RustJSONSchema::JSONParseError`.
 - Calling `RustJSONSchema::Validator#new` with an invalid schema will raise `RustJSONSchema::SchemaParseError`.
-
-## TODO
-
-- Support passing options as `jsonschema-rs` does
+- Calling `RustJSONSchema::Validator#new` with an invalid draft version value will raise `RustJSONSchema::InvalidOptionsError`.
 
 ## Development
 

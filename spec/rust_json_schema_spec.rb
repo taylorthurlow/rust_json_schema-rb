@@ -8,6 +8,37 @@ RSpec.describe RustJSONSchema do
   end
 
   describe RustJSONSchema::Validator do
+    describe "#initialize" do
+      describe ":draft option" do
+        %i[draft4 draft6 draft7 draft201909 draft202012].each do |draft|
+          it "accepts draft '#{draft}'" do
+            schema = JSON.generate({})
+
+            expect {
+              RustJSONSchema::Validator.new(schema, draft: draft)
+            }.not_to raise_exception
+          end
+        end
+
+        it "raises an exception when the draft is not supported" do
+          schema = JSON.generate({})
+
+          expect {
+            RustJSONSchema::Validator.new(schema, draft: "foo")
+          }.to raise_exception "invalid draft: 'foo'"
+        end
+      end
+
+      describe ":with_meta_schemas option" do
+        it "does not raise an exception when provided" do
+          schema = JSON.generate({})
+          expect {
+            RustJSONSchema::Validator.new(schema, with_meta_schemas: true)
+          }.not_to raise_exception
+        end
+      end
+    end
+
     it "raises an error when the input schema is not valid JSON" do
       schema = "not valid json"
 
@@ -149,6 +180,34 @@ RSpec.describe RustJSONSchema do
             validator.valid?("not valid json")
           }.to raise_exception(RustJSONSchema::JSONParseError)
         end
+      end
+    end
+
+    describe "#options" do
+      it "has some default options" do
+        schema = JSON.generate({})
+
+        validator = RustJSONSchema::Validator.new(schema)
+
+        expect(validator.options).to eq(
+          draft: :draft7,
+          with_meta_schemas: false
+        )
+      end
+
+      it "returns a hash with the options" do
+        schema = JSON.generate({})
+
+        validator = RustJSONSchema::Validator.new(
+          schema,
+          draft: :draft4,
+          with_meta_schemas: true
+        )
+
+        expect(validator.options).to eq(
+          draft: :draft4,
+          with_meta_schemas: true
+        )
       end
     end
   end
