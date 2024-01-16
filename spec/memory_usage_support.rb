@@ -89,13 +89,12 @@ module MemoryUsageSupport
 
         MemoryUsageSupport.gc!
         usage
-        sleep 0.1
       end
     end
 
     # usage in kB
     def usage
-      rss = `ps -p #{Process.pid} -o rss -h`.strip.to_i
+      rss = `ps -p #{Process.pid} -o rss -h`.gsub(/\D/, "")
 
       puts rss
 
@@ -108,4 +107,4 @@ client = MemoryUsageSupport::Client.new(wait: 30, sample: 1000)
 client.call
 client.generate_report
 
-binding.irb # rubocop:disable Lint/Debugger
+# binding.irb # rubocop:disable Lint/Debugger
