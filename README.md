@@ -57,6 +57,8 @@ errors = validator.validate('{ "foo": 1, "bar": "wadus" }')
 
 Any additional options provided by the `jsonschema` crate are options I do not understand or may not make sense to implement in a wrapper library such as this.
 
+`RustJSONSchema::Validator#options` is provided and will return a Hash containing configuration options from the underlying Rust library. While I make an effort for them to look similar, or identical, to the options passed into the `Validator` initializer, the initializer arguments and the returned Hash should not be considered one-to-one. It exists as a way to confirm the configuration of the underlying schema validator instance.
+
 ### Errors
 
 - All errors are subclasses of `RustJSONSchema::Error`.
