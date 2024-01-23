@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Ruby wrapper for jsonschema-rs"
   spec.description = "Ruby wrapper for jsonschema-rs"
-  spec.homepage = "https://github.com/taylorthurlow/rust_json_schema"
+  spec.homepage = "https://github.com/taylorthurlow/rust_json_schema-rb"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0"
   spec.required_rubygems_version = ">= 3.3.11"
