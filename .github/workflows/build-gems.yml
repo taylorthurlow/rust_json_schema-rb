@@ -30,6 +30,7 @@ jobs:
     name: Cross compile gems
     needs: ci-data
     runs-on: ubuntu-latest
+    environment: release
     strategy:
       fail-fast: false
       matrix:
@@ -94,4 +95,3 @@ jobs:
       - name: "Publish to RubyGems"
         uses: rubygems/release-gem@v1
         id: publish
-
