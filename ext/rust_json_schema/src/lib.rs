@@ -16,19 +16,14 @@ use magnus::{
 struct Validator {
     schema: JSONSchema,
     draft: Draft,
-    with_meta_schemas: bool,
 }
 
 impl Validator {
     fn new(args: &[Value]) -> Result<Validator, Error> {
         let args = scan_args::<_, (), (), (), _, ()>(args)?;
         let (json,): (String,) = args.required;
-        let kwargs = get_kwargs::<_, (), (Option<Value>, Option<bool>), ()>(
-            args.keywords,
-            &[],
-            &["draft", "with_meta_schemas"],
-        )?;
-        let (draft_arg, with_meta_schemas_arg): (Option<Value>, Option<bool>) = kwargs.optional;
+        let kwargs = get_kwargs::<_, (), (Option<Value>,), ()>(args.keywords, &[], &["draft"])?;
+        let (draft_arg,): (Option<Value>,) = kwargs.optional;
 
         let draft = match draft_arg {
             Some(draft) => match draft.to_string().to_lowercase().as_str() {
@@ -47,11 +42,6 @@ impl Validator {
             None => jsonschema::Draft::default(),
         };
 
-        let with_meta_schemas = match with_meta_schemas_arg {
-            Some(with_meta_schemas) => with_meta_schemas,
-            None => false,
-        };
-
         let value: serde_json::Value = match serde_json::from_str(&json) {
             Ok(value) => value,
             Err(error) => {
@@ -65,10 +55,6 @@ impl Validator {
         let mut schema = JSONSchema::options();
         schema.with_draft(draft);
 
-        if with_meta_schemas {
-            schema.with_meta_schemas();
-        }
-
         let schema = match schema.compile(&value) {
             Ok(schema) => schema,
             Err(error) => {
@@ -79,11 +65,7 @@ impl Validator {
             }
         };
 
-        Ok(Validator {
-            schema,
-            draft,
-            with_meta_schemas,
-        })
+        Ok(Validator { schema, draft })
     }
 
     fn is_valid(&self, json: String) -> Result<bool, Error> {
@@ -107,13 +89,6 @@ impl Validator {
             .aset(
                 StaticSymbol::new("draft"),
                 StaticSymbol::new(format!("{:?}", self.draft).to_lowercase()),
-            )
-            .unwrap();
-
-        options
-            .aset(
-                StaticSymbol::new("with_meta_schemas"),
-                self.with_meta_schemas,
             )
             .unwrap();
 
