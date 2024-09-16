@@ -68,7 +68,11 @@ Any additional options provided by the `jsonschema` crate are options I do not u
 
 ## Development
 
-TODO
+The rust extension is located at `ext/rust_json_schema`, and can be compiled using the `rake-compiler` tasks, usually `bin/rake compile`. Don't attempt to `cargo build` the extension separately, that typically doesn't work. View other rake tasks with `bin/rake --tasks`.
+
+You can run the tests with `bin/rspec`, but ensure any changes to the rust extension are compiled first.
+
+To release a new version, update the version number in `version.rb`, tag the new commit with the version number, and push the tag to GitHub. The gem will be built and pushed to Rubygems automatically. This will also automatically build the platform-specific binaries and attach them to the release.
 
 ## Contributing
 
