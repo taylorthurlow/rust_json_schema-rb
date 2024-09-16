@@ -4,6 +4,9 @@
 
 `rust_json_schema` is a Ruby wrapper gem for Rust's [jsonschema-rs crate](https://github.com/Stranger6667/jsonschema-rs).
 
+> [!IMPORTANT]
+> This gem is built with `json_schema` crate version `0.19.1`, and therefore does not support any features for any potential future versions of the crate. I will review and accept PRs if you would like to work on adding support for newer versions of the crate. I generally am trying to keep things up to date but I am not cutting new releases for each new patch version of the crate.
+
 The minimum Ruby version required by this gem is 3.0, due to the runtime Rust libraries that make the extensions possible (and easy).
 
 This gem ships with precompiled binaries for Linux and macOS. Check the available gems on [Rubygems](https://rubygems.org/gems/rust_json_schema). Precompiled binaries do not exist for non-standard rubies like JRuby or TruffleRuby, nor do they exist for Windows. I will review and accept PRs if you would like to work on adding these build targets.
@@ -38,11 +41,7 @@ schema = <<~JSON
   }
 JSON
 
-validator = RustJSONSchema::Validator.new(
-  schema,
-  draft: :draft7,
-  with_meta_schemas: false
-)
+validator = RustJSONSchema::Validator.new(schema, draft: :draft7)
 
 errors = validator.validate('{ "foo": 1, "bar": "wadus" }')
 # => [
@@ -54,8 +53,7 @@ errors = validator.validate('{ "foo": 1, "bar": "wadus" }')
 
 ### Options
 
-- `:draft` - Select the JSON schema draft number to use. Valid options are `draft4`, `draft6`, `draft7`, `draft201909`, and `draft202012`. Supported drafts are entirely determined by the `jsonschema` crate. The default draft is also determined by the crate. If new versions of the crate support additional draft versions, a code change in this gem will be required. I'm open to PRs to solve this problem - I don't know enough Rust to tell if it's easily done. *Both `draft201909` and `draft202012` are reported to have "some keywords not implemented", so use them at your own risk.*
-- `:with_meta_schemas` - See [docs.rs/jsonschema CompilationOptions with_meta_schemas](https://docs.rs/jsonschema/0.17.1/jsonschema/struct.CompilationOptions.html#method.with_meta_schemas). `false` by default.
+- `:draft` - Select the JSON schema draft number to use. Valid options are `draft4`, `draft6`, `draft7`, `draft201909`, and `draft202012`. Supported drafts are entirely determined by the `jsonschema` crate. The default draft is also determined by the crate. If new versions of the crate support additional draft versions, a code change in this gem will be required. I'm open to PRs to solve this problem - I don't know enough Rust to tell if it's easily done. _Both `draft201909` and `draft202012` are reported to have "some keywords not implemented", so use them at your own risk._
 
 Any additional options provided by the `jsonschema` crate are options I do not understand or may not make sense to implement in a wrapper library such as this.
 
