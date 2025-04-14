@@ -52,10 +52,7 @@ impl Validator {
             }
         };
 
-        let mut schema = jsonschema::Validator::options();
-        schema.with_draft(draft);
-
-        let schema = match schema.build(&value) {
+        let schema = match jsonschema::options().with_draft(draft).build(&value) {
             Ok(schema) => schema,
             Err(error) => {
                 return Err(Error::new(
