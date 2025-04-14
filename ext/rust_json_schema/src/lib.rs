@@ -108,15 +108,13 @@ impl Validator {
 
         let mut errors: Vec<String> = vec![];
 
-        if let Err(validation_errors) = self.schema.validate(&value) {
-            for error in validation_errors {
-                let path = match format!("{}", error.instance_path).as_str() {
-                    "" => "/".to_string(),
-                    p => p.to_string(),
-                };
+        for error in self.schema.iter_errors(&value) {
+            let path = match format!("{}", error.instance_path).as_str() {
+                "" => "/".to_string(),
+                p => p.to_string(),
+            };
 
-                errors.push(format!("path \"{}\": {}", path, error));
-            }
+            errors.push(format!("path \"{}\": {}", path, error));
         }
 
         Ok(errors)
