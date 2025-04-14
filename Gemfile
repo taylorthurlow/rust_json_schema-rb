@@ -5,8 +5,7 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in rust_json_schema.gemspec
 gemspec
 
-gem "break"
-gem "pry"
+gem "debug"
 gem "rake", "~> 13.0"
 gem "rake-compiler"
 gem "rake-compiler-dock"
