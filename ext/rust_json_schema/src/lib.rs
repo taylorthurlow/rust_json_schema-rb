@@ -1,6 +1,6 @@
 extern crate serde_json;
 
-use jsonschema::{Draft, JSONSchema};
+use jsonschema::Draft;
 use magnus::{
     exception::ExceptionClass,
     function,
@@ -14,7 +14,7 @@ use magnus::{
 
 #[wrap(class = "RustJSONSchema::Validator")]
 struct Validator {
-    schema: JSONSchema,
+    schema: jsonschema::Validator,
     draft: Draft,
 }
 
@@ -52,10 +52,10 @@ impl Validator {
             }
         };
 
-        let mut schema = JSONSchema::options();
+        let mut schema = jsonschema::Validator::options();
         schema.with_draft(draft);
 
-        let schema = match schema.compile(&value) {
+        let schema = match schema.build(&value) {
             Ok(schema) => schema,
             Err(error) => {
                 return Err(Error::new(
