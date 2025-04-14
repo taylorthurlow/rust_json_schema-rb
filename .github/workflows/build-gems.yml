@@ -83,7 +83,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: rb-sys-bindings-${{ steps.capture.outputs.rb-sys-version }}
+          name: rb-sys-bindings-${{ steps.capture.outputs.rb-sys-version }}-ruby-${{ matrix.ruby-platform }}
           path: |
             tmp/rb-sys-dock/${{ matrix.ruby-platform }}/**/cfg-capture*
             tmp/rb-sys-dock/${{ matrix.ruby-platform }}/**/bindings*
