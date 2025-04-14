@@ -180,7 +180,7 @@ RSpec.describe RustJSONSchema do
 
         validator = RustJSONSchema::Validator.new(schema)
 
-        expect(validator.options).to eq(draft: :draft7)
+        expect(validator.options).to eq(draft: :draft202012)
       end
 
       it "returns a hash with the options" do
