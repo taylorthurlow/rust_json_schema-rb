@@ -5,7 +5,7 @@
 `rust_json_schema` is a Ruby wrapper gem for Rust's [jsonschema-rs crate](https://github.com/Stranger6667/jsonschema-rs).
 
 > [!IMPORTANT]
-> This gem is built with `json_schema` crate version `0.29.1`, and therefore does not support any features for any potential future versions of the crate. I will review and accept PRs if you would like to work on adding support for newer versions of the crate. I generally am trying to keep things up to date but I am not cutting new releases for each new patch version of the crate.
+> This gem is built with `json_schema` crate version `0.32.1`, and therefore does not support any features for any potential future versions of the crate. I will review and accept PRs if you would like to work on adding support for newer versions of the crate. I am trying to keep things up to date occasionally, but I am not regularly cutting new releases for each new version of the crate.
 
 The minimum Ruby version required by this gem is 3.0, due to the runtime Rust libraries that make the extensions possible (and easy).
 
