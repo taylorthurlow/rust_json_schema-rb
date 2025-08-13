@@ -55,7 +55,9 @@ errors = validator.validate('{ "foo": 1, "bar": "wadus" }')
 
 - `:draft` - Select the JSON schema draft number to use. Valid options are `draft4`, `draft6`, `draft7`, `draft201909`, and `draft202012`. Supported drafts are entirely determined by the `jsonschema` crate. The default draft is also determined by the crate. If new versions of the crate support additional draft versions, a code change in this gem will be required. I'm open to PRs to solve this problem - I don't know enough Rust to tell if it's easily done. _Both `draft201909` and `draft202012` are reported to have "some keywords not implemented", so use them at your own risk._
 
-Any additional options provided by the `jsonschema` crate are options I do not understand or may not make sense to implement in a wrapper library such as this.
+- `:with_base_uri` - Sets a base URI to use when resolving relative schema references during validation. Relative URIs within the schema will be evaluated relative to this base URI. This is especially useful when validating schemas loaded from sources without an inherent base URL.
+
+Any additional options provided by the `jsonschema` crate are either options I do not understand as a whole, have not figured out how to (or tried to) implement, or may not make sense to implement in a wrapper library such as this.
 
 `RustJSONSchema::Validator#options` is provided and will return a Hash containing configuration options from the underlying Rust library. While I make an effort for them to look similar, or identical, to the options passed into the `Validator` initializer, the initializer arguments and the returned Hash should not be considered one-to-one. It exists as a way to confirm the configuration of the underlying schema validator instance.
 

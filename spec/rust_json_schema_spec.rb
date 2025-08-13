@@ -28,6 +28,29 @@ RSpec.describe RustJSONSchema do
           }.to raise_exception "invalid draft: 'foo'"
         end
       end
+
+      describe ":with_base_uri option" do
+        it "is accepted" do
+          schema = JSON.generate({})
+
+          expect {
+            RustJSONSchema::Validator.new(schema, with_base_uri: "afiojwe")
+          }.not_to raise_exception
+        end
+
+        it "raises an exception with invalid base URI" do
+          schema = JSON.generate({
+            type: "object",
+            properties: {
+              foo: {"$ref": "subschema.json"}
+            }
+          })
+
+          expect {
+            RustJSONSchema::Validator.new(schema, with_base_uri: "file:///nonexistent/")
+          }.to raise_error RustJSONSchema::SchemaParseError, /not present in a registry and retrieving it failed/
+        end
+      end
     end
 
     it "raises an error when the input schema is not valid JSON" do
@@ -183,7 +206,7 @@ RSpec.describe RustJSONSchema do
         expect(validator.options).to eq(draft: :draft202012)
       end
 
-      it "returns a hash with the options" do
+      it "returns a hash with a draft option" do
         schema = JSON.generate({})
 
         validator = RustJSONSchema::Validator.new(
@@ -192,6 +215,17 @@ RSpec.describe RustJSONSchema do
         )
 
         expect(validator.options).to eq(draft: :draft4)
+      end
+
+      it "returns a hash with a with_base_uri option" do
+        schema = JSON.generate({})
+
+        validator = RustJSONSchema::Validator.new(
+          schema,
+          with_base_uri: "https://example.com/schemas"
+        )
+
+        expect(validator.options).to include(with_base_uri: "https://example.com/schemas")
       end
     end
   end

@@ -9,21 +9,37 @@ use magnus::{
     prelude::*,
     scan_args::{get_kwargs, scan_args},
     value::Lazy,
-    wrap, Error, RHash, RModule, Ruby, StaticSymbol, Value,
+    wrap, Error, RHash, RModule, RString, Ruby, StaticSymbol, Value,
 };
 
 #[wrap(class = "RustJSONSchema::Validator")]
 struct Validator {
     schema: jsonschema::Validator,
     draft: Draft,
+    base_uri: Option<String>,
 }
 
 impl Validator {
     fn new(args: &[Value]) -> Result<Validator, Error> {
         let args = scan_args::<_, (), (), (), _, ()>(args)?;
         let (json,): (String,) = args.required;
-        let kwargs = get_kwargs::<_, (), (Option<Value>,), ()>(args.keywords, &[], &["draft"])?;
-        let (draft_arg,): (Option<Value>,) = kwargs.optional;
+
+        let value: serde_json::Value = match serde_json::from_str(&json) {
+            Ok(value) => value,
+            Err(error) => {
+                return Err(Error::new(
+                    Self::ruby().get_inner(&JSON_PARSE_ERROR),
+                    error.to_string(),
+                ))
+            }
+        };
+
+        let kwargs = get_kwargs::<_, (), (Option<Value>, Option<Value>), ()>(
+            args.keywords,
+            &[],
+            &["draft", "with_base_uri"],
+        )?;
+        let (draft_arg, with_base_uri_arg): (Option<Value>, Option<Value>) = kwargs.optional;
 
         let draft = match draft_arg {
             Some(draft) => match draft.to_string().to_lowercase().as_str() {
@@ -42,17 +58,19 @@ impl Validator {
             None => jsonschema::Draft::default(),
         };
 
-        let value: serde_json::Value = match serde_json::from_str(&json) {
-            Ok(value) => value,
-            Err(error) => {
-                return Err(Error::new(
-                    Self::ruby().get_inner(&JSON_PARSE_ERROR),
-                    error.to_string(),
-                ))
-            }
+        let options = jsonschema::options().with_draft(draft);
+
+        let base_uri = match with_base_uri_arg {
+            Some(uri) if !uri.is_nil() => Some(uri.to_string()),
+            _ => None,
         };
 
-        let schema = match jsonschema::options().with_draft(draft).build(&value) {
+        let options = match base_uri {
+            Some(ref uri) => options.with_base_uri(uri),
+            None => options,
+        };
+
+        let schema = match options.build(&value) {
             Ok(schema) => schema,
             Err(error) => {
                 return Err(Error::new(
@@ -62,7 +80,11 @@ impl Validator {
             }
         };
 
-        Ok(Validator { schema, draft })
+        Ok(Validator {
+            schema,
+            draft,
+            base_uri,
+        })
     }
 
     fn is_valid(&self, json: String) -> Result<bool, Error> {
@@ -80,16 +102,22 @@ impl Validator {
     }
 
     fn options(&self) -> Result<RHash, Error> {
-        let options = RHash::new();
+        let result = RHash::new();
 
-        options
+        result
             .aset(
                 StaticSymbol::new("draft"),
                 StaticSymbol::new(format!("{:?}", self.draft).to_lowercase()),
             )
             .unwrap();
 
-        Ok(options)
+        if let Some(uri) = &self.base_uri {
+            result
+                .aset(StaticSymbol::new("with_base_uri"), RString::new(uri))
+                .unwrap();
+        }
+
+        Ok(result)
     }
 
     fn validate(&self, json: String) -> Result<Vec<String>, Error> {
