@@ -9,7 +9,7 @@ use magnus::{
     prelude::*,
     scan_args::{get_kwargs, scan_args},
     value::Lazy,
-    wrap, Error, RHash, RModule, RString, Ruby, StaticSymbol, Value,
+    wrap, Error, RHash, RModule, Ruby, Value,
 };
 
 #[wrap(class = "RustJSONSchema::Validator")]
@@ -102,18 +102,19 @@ impl Validator {
     }
 
     fn options(&self) -> Result<RHash, Error> {
-        let result = RHash::new();
+        let ruby = Self::ruby();
+        let result = ruby.hash_new();
 
         result
             .aset(
-                StaticSymbol::new("draft"),
-                StaticSymbol::new(format!("{:?}", self.draft).to_lowercase()),
+                ruby.sym_new("draft"),
+                ruby.sym_new(format!("{:?}", self.draft).to_lowercase()),
             )
             .unwrap();
 
         if let Some(uri) = &self.base_uri {
             result
-                .aset(StaticSymbol::new("with_base_uri"), RString::new(uri))
+                .aset(ruby.sym_new("with_base_uri"), ruby.str_new(uri))
                 .unwrap();
         }
 
