@@ -105,17 +105,13 @@ impl Validator {
         let ruby = Self::ruby();
         let result = ruby.hash_new();
 
-        result
-            .aset(
-                ruby.sym_new("draft"),
-                ruby.sym_new(format!("{:?}", self.draft).to_lowercase()),
-            )
-            .unwrap();
+        result.aset(
+            ruby.sym_new("draft"),
+            ruby.sym_new(format!("{:?}", self.draft).to_lowercase()),
+        )?;
 
         if let Some(uri) = &self.base_uri {
-            result
-                .aset(ruby.sym_new("with_base_uri"), ruby.str_new(uri))
-                .unwrap();
+            result.aset(ruby.sym_new("with_base_uri"), ruby.str_new(uri))?;
         }
 
         Ok(result)
